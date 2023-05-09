@@ -27,12 +27,12 @@ app.use((req, res, next) => {
 })
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
-app.use(expressJWT({ secret: config.jwtSecretKey }).unless({ path: [/^\/api\/auth\//] }))
+// app.use(expressJWT({ secret: config.jwtSecretKey }).unless({ path: [/^\/api\/auth\//] }))
 app.use(function (err, req, res, next) {
   if (err.name === 'UnauthorizedError') return res.esend('身份认证失败！')
   next()
 })
-app.use(function (req, res, next) {
+/* app.use(function (req, res, next) {
   //正则匹配需要鉴权的路由
   const regexp = new RegExp('^/api/auth')
   if (!regexp.test(req.path)) {
@@ -42,7 +42,7 @@ app.use(function (req, res, next) {
     req.username = result.username
   }
   next()
-})
+}) */
 app.use('/api', userRouter)
 server.listen(5000, function () {
   console.log('api server running at http://127.0.0.1:5000')

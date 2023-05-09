@@ -13,6 +13,6 @@ router.post('/auth/login', userHandler.login)
 // router.get('/users', userHandler.getUser)
 
 //获取所有用户列表
-// router.get('/users/all', userHandler.getAllUsers)
+router.get('/users/list', userHandler.getAllUser)
 
 module.exports = router

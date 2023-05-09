@@ -60,3 +60,13 @@ exports.login = async (req, res) => {
   }, 2000)
   await db.end()
 }
+
+//获取所有的队长和队员
+exports.getAllUser = async (req, res) => {
+  const db = await connectToDatabase()
+  const { code } = req.query
+  const sql = `select * from users where username like "%${code}%" and role_id != 1`
+  const [rows] = await db.query(sql)
+  res.ssend(rows)
+  await db.end()
+}
