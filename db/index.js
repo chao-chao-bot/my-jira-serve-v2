@@ -4,7 +4,7 @@ async function connectToDatabase() {
     host: '127.0.0.1',
     user: 'root',
     password: 'root',
-    database: 'jira_db'
+    database: 'task_manage'
   })
 
   return connection
