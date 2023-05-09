@@ -30,4 +30,6 @@ exports.regUser = async (req, res) => {
   })
   await db.end()
 }
-exports.login = async (req, res) => {}
+exports.login = async (req, res) => {
+  //
+}
