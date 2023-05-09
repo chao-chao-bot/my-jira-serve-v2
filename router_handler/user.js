@@ -31,5 +31,29 @@ exports.regUser = async (req, res) => {
   await db.end()
 }
 exports.login = async (req, res) => {
-  //
+  const db = await connectToDatabase()
+  const userinfo = req.body
+  // 判断数据是否合法
+  if (!userinfo.username || !userinfo.password) {
+    return res.esend('用户名或密码不能为空！')
+  }
+  const sql = `select * from user where username=?`
+  const [rows] = await db.query(sql, [userinfo.username])
+  if (rows.length !== 1) return res.esend('登录失败,请检查账号和密码')
+  const compareResult = await bcrypt.compareSync(userinfo.password, rows[0].password)
+  if (!compareResult) {
+    return res.esend('登录失败,请检查账号和密码')
+  }
+  const user = { ...rows[0], password: '' }
+  const tokenStr = jwt.sign(user, config.jwtSecretKey, {
+    expiresIn: '40h'
+  })
+  setTimeout(() => {
+    res.ssend({
+      token: 'Bearer ' + tokenStr,
+      username: rows[0].username,
+      id: rows[0].id
+    })
+  }, 2000)
+  await db.end()
 }
