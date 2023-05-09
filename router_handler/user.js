@@ -60,7 +60,6 @@ exports.login = async (req, res) => {
   }, 2000)
   await db.end()
 }
-
 //获取所有的队长和队员
 exports.getAllUser = async (req, res) => {
   const db = await connectToDatabase()
