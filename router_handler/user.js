@@ -22,12 +22,14 @@ exports.regUser = async (req, res) => {
   const tokenStr = jwt.sign(user, config.jwtSecretKey, {
     expiresIn: '10h'
   })
-  return res.ssend({
-    token: 'Bearer ' + tokenStr,
-    username: username,
-    id: inserRows.insertId,
-    auth: authRows[0]
-  })
+  setTimeout(() => {
+    return res.ssend({
+      token: 'Bearer ' + tokenStr,
+      username: username,
+      id: inserRows.insertId,
+      auth: authRows[0]
+    })
+  }, 1000)
   await db.end()
 }
 
@@ -45,7 +47,7 @@ exports.login = async (req, res) => {
     return res.esend('登录失败,请检查账号和密码')
   }
   const authSql = `select * from roles where role_id = ?`
-  const [authRows] = await db.query(authSql, [role_id])
+  const [authRows] = await db.query(authSql, [rows[0].role_id])
   const user = { ...rows[0], password: '' }
   const tokenStr = jwt.sign(user, config.jwtSecretKey, {
     expiresIn: '40h'
@@ -54,10 +56,10 @@ exports.login = async (req, res) => {
     res.ssend({
       token: 'Bearer ' + tokenStr,
       username: rows[0].username,
-      id: rows[0].id,
+      id: rows[0].user_id,
       auth: authRows[0]
     })
-  }, 2000)
+  }, 1000)
   await db.end()
 }
 //获取所有的队长和队员
@@ -67,5 +69,14 @@ exports.getAllUser = async (req, res) => {
   const sql = `select * from users where username like "%${code}%" and role_id != 1`
   const [rows] = await db.query(sql)
   res.ssend(rows)
+  await db.end()
+}
+
+exports.getUserInfo = async (req, res) => {
+  const db = await connectToDatabase()
+  const { id } = req.query
+  const sql = `select user_id,username,role_id from users where user_id = ?`
+  const [rows] = await db.query(sql, [id])
+  res.ssend(rows[0])
   await db.end()
 }

@@ -15,4 +15,6 @@ router.post('/auth/login', userHandler.login)
 //获取所有用户列表
 router.get('/users/list', userHandler.getAllUser)
 
+//获取用户信息
+router.get('/users/info', userHandler.getUserInfo)
 module.exports = router
