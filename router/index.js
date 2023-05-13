@@ -1,8 +1,10 @@
 const userRouter = require('./user')
 const projectRouter = require('./project')
 const taskRouter = require('./task')
+const teamRouter = require('./team')
 module.exports = {
   userRouter,
   projectRouter,
-  taskRouter
+  taskRouter,
+  teamRouter
 }
