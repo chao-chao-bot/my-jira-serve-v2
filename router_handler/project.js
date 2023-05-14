@@ -23,7 +23,6 @@ exports.addProject = async (req, res) => {
     return res.esend('创建项目失败')
   }
 
-  console.log('project_id---', insertResult.insertId)
   const insertVisSql = 'insert into project_visibility set ?'
   const visParam = { project_id: insertResult.insertId, team_id }
   const [visResult] = await db.query(insertVisSql, [visParam])
@@ -50,7 +49,53 @@ exports.getProjects = async (req, res) => {
     sql_leader = `select * from (${sql}) as t where t.leader_id = ${leader_id}`
   }
   const [projects] = await db.query(leader_id ? sql_leader : sql)
-  const mapData = projects.map(project => ({ ...project, operable: project.leader_id === user_id }))
+  const mapData = projects.map(project => ({ ...project, operable: project.leader_id !== user_id }))
   res.ssend(mapData)
+  await db.end()
+}
+
+/** 项目编辑*/
+exports.editProject = async (req, res) => {
+  const db = await connectToDatabase()
+  const { user_id } = req
+  const { project_id, project_name, project_description, team_id } = req.body
+  const allSql = `select * from projects where 
+  project_id in (select project_id from project_visibility where team_id in (select team_id from team_members where user_id = ${user_id})) or leader_id = ${user_id}`
+  const [repeat] = await db.query(allSql)
+  if (repeat.some(item => item.project_name === project_name && item.project_id !== project_id)) {
+    return res.esend('项目名称已经存在，请重试')
+  }
+
+  const updateProjectSQl = `update projects set project_name="${project_name}", project_description="${project_description}",team_id=${team_id} where project_id=${project_id}`
+  const [rows] = await db.query(updateProjectSQl)
+  if (rows.affectedRows !== 1) {
+    return res.esend('项目编辑错误,请重试')
+  }
+  const updateVisSql = `update project_visibility set team_id = ${team_id} where project_id = ${project_id}`
+  const [visRows] = await db.query(updateVisSql)
+  if (visRows.affectedRows !== 1) {
+    return res.esend('项目编辑错误,请重试')
+  }
+  return res.ssend()
+  await db.end()
+}
+/** 项目删除*/
+exports.deleteProject = async (req, res) => {
+  const db = await connectToDatabase()
+  const { project_id } = req.body
+  const { user_id } = req
+  // 删除项目下的看板 任务列表  项目可见表 任务表
+  const deleteBoard = `delete from boards where project_id = ${project_id}`
+  const [deleteBoardesult] = await db.query(deleteBoard)
+  const deleteTask = `delete from tasks where project_id = ${project_id}`
+  const [ddeleteTaskResult] = await db.query(deleteTask)
+  const deleteVis = `delete from project_visibility where project_id = ${project_id}`
+  const [ddeleteVisResult] = await db.query(deleteVis)
+  const deleteProject = `delete from projects where project_id = ${project_id}`
+  const [deleteProjectResult] = await db.query(deleteProject)
+  if (deleteProjectResult.affectedRows !== 1) {
+    return res.esend('删除失败！')
+  }
+  res.ssend()
   await db.end()
 }
