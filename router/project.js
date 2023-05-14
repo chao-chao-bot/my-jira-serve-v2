@@ -6,6 +6,7 @@ const projectHandler = require('../router_handler/project')
 
 // 获取项目列表
 router.get('/project/list', projectHandler.getProjects)
+router.post('/project/create', projectHandler.addProject)
 //项目编辑
 router.post('/project/edit')
 

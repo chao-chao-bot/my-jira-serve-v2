@@ -1,5 +1,16 @@
 const db = require('../db/index')
 const { connectToDatabase } = require('../db/index')
+
+exports.getTeamList = async (req, res) => {
+  const db = await connectToDatabase()
+  const user_id = req.user_id
+  const sql = `select * from teams where team_leader_id = ${user_id}`
+  const [rows] = await db.query(sql)
+  res.ssend(rows)
+  await db.end()
+}
+
+/**返回团队领导班子 */
 //获取 user_id 所在团队的 leader 列表  项目的负责人就是团队leader 首先找到和自己有关的团队 通过团队获取到 leader 这里的通过团队是两种身份一种是队员 一种是leader
 exports.getTeamLeader = async (req, res) => {
   const db = await connectToDatabase()

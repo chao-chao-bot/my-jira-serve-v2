@@ -4,4 +4,5 @@ const teamHandler = require('../router_handler/team')
 
 //获取所有某个项目下的任务
 router.get('/team/leader', teamHandler.getTeamLeader)
+router.get('/team/list', teamHandler.getTeamList)
 module.exports = router

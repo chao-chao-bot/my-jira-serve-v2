@@ -20,7 +20,7 @@ app.use((req, res, next) => {
     res.send({
       status,
       message: 'success',
-      data: data || {}
+      data: data || { status }
     })
   }
   next()
