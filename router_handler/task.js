@@ -78,3 +78,17 @@ exports.createTask = async (req, res) => {
   res.ssend()
   await db.end()
 }
+
+exports.editTask = async (req, res) => {
+  const db = await connectToDatabase()
+  const { id, task_name, task_description, project_id, type, board_id, priority, end_date } =
+    req.body
+  const sql = `update tasks set task_name = "${task_name}",task_description = "${task_description}", project_id=${project_id},type="${type}",board_id=${board_id},
+  priority="${priority}", end_date="${end_date}" where task_id = ${id}`
+  const [updateTask] = await db.query(sql)
+  if (updateTask.affectedRows !== 1) {
+    return res.ssend('编辑失败，请稍后再试！')
+  }
+  res.ssend()
+  await db.end()
+}
