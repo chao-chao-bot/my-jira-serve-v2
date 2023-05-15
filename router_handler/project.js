@@ -1,6 +1,5 @@
 const db = require('../db/index')
 const { connectToDatabase } = require('../db/index')
-
 // 创建项目
 exports.addProject = async (req, res) => {
   const db = await connectToDatabase()
@@ -22,10 +21,33 @@ exports.addProject = async (req, res) => {
   if (insertResult.affectedRows !== 1) {
     return res.esend('创建项目失败')
   }
-
   const insertVisSql = 'insert into project_visibility set ?'
   const visParam = { project_id: insertResult.insertId, team_id }
   const [visResult] = await db.query(insertVisSql, [visParam])
+
+  //一个项目创建好后 需要自动新建三个看板在 board表
+  //1.查找出在project_id下最大的order_id
+  const max_order_id_arr = [1, 2, 3]
+  const initStatus = ['in_review', 'in_progress', 'complete']
+  const intStatusMap = [
+    { board_name: 'in_review', order_id: 1 },
+    { board_name: 'in_progress', order_id: 2 },
+    { board_name: 'complete', order_id: 3 }
+  ]
+  const project_id = insertResult.insertId
+  const insBoaradSql = `insert into boards set ?`
+  //插入到board
+  for (let i = 0; i < intStatusMap.length; i++) {
+    const insertData = {
+      board_name: intStatusMap[i].board_name,
+      order_id: intStatusMap[i].order_id,
+      project_id
+    }
+    const [result] = await db.query(insBoaradSql, [insertData])
+    if (result.affectedRows !== 1) {
+      return res.esend('创建项目失败啦')
+    }
+  }
   if (visResult.affectedRows !== 1) {
     return res.esend('创建项目失败啦')
   }
