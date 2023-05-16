@@ -39,3 +39,19 @@ exports.reorderBoard = async (req, res) => {
   res.ssend(result)
   await db.end()
 }
+// 创建看板
+exports.addBoard = async (req, res) => {
+  const db = await connectToDatabase()
+  const { board_name, project_id } = req.body
+  const selectMaxSQl = `select max(order_id) as max_order_id from boards where project_id = ${project_id}`
+  const [maxOrder] = await db.query(selectMaxSQl)
+  const maxOrderId = maxOrder[0].max_order_id + 1
+  const insertData = { board_name, project_id, order_id: maxOrderId, project_id }
+  const insetSql = `insert into boards set ? `
+  const [result] = await db.query(insetSql, [insertData])
+  if (result.affectedRows !== 1) {
+    res.esend('创建失败，请稍后再试！')
+  }
+  res.ssend()
+  await db.end()
+}
