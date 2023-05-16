@@ -1,4 +1,3 @@
-const db = require('../db/index')
 const { connectToDatabase } = require('../db/index')
 // 创建项目
 exports.addProject = async (req, res) => {

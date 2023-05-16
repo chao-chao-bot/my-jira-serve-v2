@@ -5,7 +5,6 @@ const router = express.Router()
 const boardHandler = require('../router_handler/board')
 
 router.get('/board/list', boardHandler.getBoardList)
-// 登录
-router.post('/board/edit')
+router.post('/board/reorder', boardHandler.reorderBoard)
 
 module.exports = router
