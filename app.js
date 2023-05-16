@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const config = require('./config')
-const { userRouter, projectRouter, taskRouter, teamRouter } = require('./router')
+const { userRouter, projectRouter, taskRouter, teamRouter, boardRouter } = require('./router')
 // 解析 token 的中间件
 const expressJWT = require('express-jwt')
 const jwt = require('jsonwebtoken')
@@ -47,6 +47,7 @@ app.use('/api', userRouter)
 app.use('/api', projectRouter)
 app.use('/api', taskRouter)
 app.use('/api', teamRouter)
+app.use('/api', boardRouter)
 server.listen(5000, function () {
   console.log('api server running at http://127.0.0.1:5000')
 })

@@ -20,7 +20,10 @@ exports.getTasks = async (req, res) => {
   }
   sql += ` order by order_id`
   const [tasks] = await db.query(sql)
-  const mapData = tasks.map(task => ({ ...task, disabled: task.creator_id !== user_id }))
+  const mapData = tasks.map(task => ({
+    ...task,
+    disabled: task.creator_id !== user_id
+  }))
   res.ssend(mapData)
   await db.end()
 }
@@ -78,7 +81,7 @@ exports.createTask = async (req, res) => {
   res.ssend()
   await db.end()
 }
-
+// 任务编辑
 exports.editTask = async (req, res) => {
   const db = await connectToDatabase()
   const { id, task_name, task_description, project_id, type, board_id, priority, end_date } =
@@ -88,6 +91,18 @@ exports.editTask = async (req, res) => {
   const [updateTask] = await db.query(sql)
   if (updateTask.affectedRows !== 1) {
     return res.ssend('编辑失败，请稍后再试！')
+  }
+  res.ssend()
+  await db.end()
+}
+// 任务删除
+exports.deleteTask = async (req, res) => {
+  const db = await connectToDatabase()
+  const { task_id } = req.body
+  const delteTaskSql = `delete from tasks where task_id = ${task_id}`
+  const [deleteResult] = await db.query(delteTaskSql)
+  if (deleteResult.affectedRows !== 1) {
+    return res.esend('删除失败请稍后再试！')
   }
   res.ssend()
   await db.end()
