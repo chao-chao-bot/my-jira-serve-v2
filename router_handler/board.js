@@ -5,8 +5,26 @@ exports.getBoardList = async (req, res) => {
   const db = await connectToDatabase()
   const { project_id } = req.query
   const sql = `select * from boards where project_id = ${project_id} order by order_id asc`
-  const [results] = await db.query(sql)
-  res.ssend(results)
+  const [boardList] = await db.query(sql)
+
+  const selectProjectSQl = `select board_id from tasks where project_id = ${project_id}`
+  const [taskList] = await db.query(selectProjectSQl)
+  console.log(taskList)
+  const boardDisabledId = []
+  for (let i = 0; i < taskList.length; i++) {
+    const push_id = taskList[i].board_id
+    if (boardDisabledId.indexOf(push_id) === -1) {
+      boardDisabledId.push(push_id)
+    }
+  }
+  for (let i = 0; i < boardList.length; i++) {
+    if (boardDisabledId.includes(boardList[i].board_id)) {
+      boardList[i]['disabled'] = true
+    } else {
+      boardList[i]['disabled'] = false
+    }
+  }
+  res.ssend(boardList)
   await db.end()
 }
 
@@ -14,7 +32,6 @@ exports.getBoardList = async (req, res) => {
 exports.reorderBoard = async (req, res) => {
   const db = await connectToDatabase()
   const { fromId, referenceId, project_id, type } = req.body
-  console.log(req.body)
   if (fromId < referenceId) {
     await db.query(
       `UPDATE boards SET order_id = -1 WHERE order_id = ${fromId} and project_id=${project_id}`
