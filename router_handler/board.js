@@ -1,4 +1,5 @@
 const db = require('../db/index')
+const { swapOrderId } = require('./util')
 const { connectToDatabase } = require('../db/index')
 // 获取看板列表
 exports.getBoardList = async (req, res) => {
@@ -31,25 +32,7 @@ exports.getBoardList = async (req, res) => {
 exports.reorderBoard = async (req, res) => {
   const db = await connectToDatabase()
   const { fromId, referenceId, project_id, type } = req.body
-  if (fromId < referenceId) {
-    await db.query(
-      `UPDATE boards SET order_id = -1 WHERE order_id = ${fromId} and project_id=${project_id}`
-    )
-    await db.query(
-      `UPDATE boards SET order_id = order_id - 1 WHERE order_id > ${fromId} and order_id <= ${referenceId} and project_id=${project_id}`
-    )
-    await db.query(
-      `UPDATE boards SET order_id = ${referenceId} WHERE order_id = -1 and project_id=${project_id}`
-    )
-  } else {
-    await db.query(
-      `UPDATE boards SET order_id = -1  WHERE order_id = ${fromId} and project_id=${project_id}`
-    )
-    await db.query(
-      `UPDATE boards SET order_id = order_id + 1 WHERE order_id < ${fromId} and order_id >= ${referenceId}`
-    )
-    await db.query(`UPDATE boards SET order_id = ${referenceId} WHERE order_id = -1`)
-  }
+  await swapOrderId('boards', fromId, referenceId, project_id)
   const searchSql = `select * from boards where project_id=${project_id}`
   const [result] = await db.query(searchSql)
   res.ssend(result)
@@ -68,6 +51,7 @@ exports.addBoard = async (req, res) => {
   if (result.affectedRows !== 1) {
     res.esend('创建失败，请稍后再试！')
   }
+
   res.ssend()
   await db.end()
 }

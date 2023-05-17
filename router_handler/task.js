@@ -1,4 +1,5 @@
 const db = require('../db/index')
+const { swapOrderId } = require('./util')
 const { connectToDatabase } = require('../db/index')
 //获取任务列表
 exports.getTasks = async (req, res) => {
@@ -18,7 +19,7 @@ exports.getTasks = async (req, res) => {
   if (priority) {
     sql += ` and priority = "${priority}"`
   }
-  sql += ` order by order_id`
+  sql += ` order by order_id asc`
   const [tasks] = await db.query(sql)
   const mapData = tasks.map(task => ({
     ...task,
@@ -105,5 +106,42 @@ exports.deleteTask = async (req, res) => {
     return res.esend('删除失败请稍后再试！')
   }
   res.ssend()
+  await db.end()
+}
+
+// task排序
+exports.reorderTask = async (req, res) => {
+  const db = await connectToDatabase()
+  const { fromId, referenceId, fromBoardId, toBoardId, type, project_id } = req.body
+  console.log(req.body)
+  if (fromBoardId === toBoardId) {
+    await swapOrderId('tasks', fromId, referenceId, project_id)
+  } else {
+    if (!referenceId) {
+      const searchColumnMaxOrderIdSQl = `select max(order_id) as max from tasks where board_id = ${toBoardId}`
+      const [searchColumnMaxOrderId] = await db.query(searchColumnMaxOrderIdSQl)
+      const updateOrderId = searchColumnMaxOrderId[0].max + 1
+      console.log(updateOrderId)
+      const updateDragSQl = `update tasks set board_id = ${toBoardId},order_id = -1 where order_id = ${fromId}`
+      await db.query(updateDragSQl)
+      const updateOtherSQl = `update tasks set order_id = order_id + 1 where order_id >= ${updateOrderId}`
+      await db.query(updateOtherSQl)
+      const updateDragSQl2 = `update tasks set order_id = ${updateOrderId} where order_id = -1`
+      await db.query(updateDragSQl2)
+    } else {
+      const updateItemSql = `update tasks set board_id = ${toBoardId}, order_id = -1 where order_id = ${fromId}`
+      await db.query(updateItemSql)
+      const updateOtherItemSql = `update tasks set order_id = order_id + 1 where order_id >= ${referenceId}`
+      await db.query(updateOtherItemSql)
+      const updateDragSQl = `update tasks set order_id = ${referenceId} where order_id = -1`
+      await db.query(updateDragSQl)
+    }
+  }
+
+  const searchSql = `select * from tasks where project_id = ${project_id}`
+  const [result] = await db.query(searchSql)
+
+  res.ssend(result)
+
   await db.end()
 }
