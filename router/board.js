@@ -8,5 +8,6 @@ router.get('/board/list', boardHandler.getBoardList)
 router.post('/board/reorder', boardHandler.reorderBoard)
 router.post('/board/add', boardHandler.addBoard)
 router.post('/board/delete', boardHandler.deleteBoard)
+router.post('/board/edit', boardHandler.editBoard)
 
 module.exports = router

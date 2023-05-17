@@ -9,7 +9,6 @@ exports.getBoardList = async (req, res) => {
 
   const selectProjectSQl = `select board_id from tasks where project_id = ${project_id}`
   const [taskList] = await db.query(selectProjectSQl)
-  console.log(taskList)
   const boardDisabledId = []
   for (let i = 0; i < taskList.length; i++) {
     const push_id = taskList[i].board_id
@@ -80,6 +79,18 @@ exports.deleteBoard = async (req, res) => {
   const [deleteResult] = await db.query(deleteSql)
   if (deleteResult.affectedRows !== 1) {
     return res.esend()
+  }
+  res.ssend()
+  await db.end()
+}
+//看板编辑
+exports.editBoard = async (req, res) => {
+  const db = await connectToDatabase()
+  const { board_id, board_name } = req.body
+  const editSql = `update  boards set board_name="${board_name}" where board_id=${board_id}`
+  const [editResult] = await db.query(editSql)
+  if (editResult.affectedRows !== 1) {
+    res.esend('编辑失败，请稍后再试！')
   }
   res.ssend()
   await db.end()
