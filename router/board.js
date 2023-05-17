@@ -7,5 +7,6 @@ const boardHandler = require('../router_handler/board')
 router.get('/board/list', boardHandler.getBoardList)
 router.post('/board/reorder', boardHandler.reorderBoard)
 router.post('/board/add', boardHandler.addBoard)
+router.post('/board/delete', boardHandler.deleteBoard)
 
 module.exports = router

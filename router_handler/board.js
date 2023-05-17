@@ -72,3 +72,15 @@ exports.addBoard = async (req, res) => {
   res.ssend()
   await db.end()
 }
+//看板删除
+exports.deleteBoard = async (req, res) => {
+  const db = await connectToDatabase()
+  const { board_id } = req.body
+  const deleteSql = `delete from boards where board_id = ${board_id}`
+  const [deleteResult] = await db.query(deleteSql)
+  if (deleteResult.affectedRows !== 1) {
+    return res.esend()
+  }
+  res.ssend()
+  await db.end()
+}
